@@ -37,16 +37,18 @@ Treat uncertain desktop effects as physical input and run the gate.
    current platform and verifies its SHA-256 checksum. Do not install npm
    packages. If bootstrap fails or Node.js is unavailable, fail closed.
 4. Create a unique result path inside the operating system's temporary
-   directory. Start the selected app with the following arguments and wait for
-   that exact process without a timeout:
+   directory. Set the skill directory as the working directory, then invoke the
+   selected app directly as the foreground command with the following arguments:
 
    ```text
-   --mode always --agent "Codex" --session-label "<session>" --reason "<bounded action>" --result-file "<temporary-result-path>"
+   <selected-app-path> --mode always --agent "Codex" --session-label "<session>" --reason "<bounded action>" --result-file "<temporary-result-path>"
    ```
 
-   Use the current environment's process API to wait. On Windows, explicitly
-   wait for the GUI process instead of relying on an interactive shell's default
-   GUI-launch behavior.
+   Let the command-execution tool wait for that directly invoked process without
+   a timeout. Do not use an indirect or detached launcher such as PowerShell
+   `Start-Process`, .NET `Process.Start`, `cmd /c start`, `open`, `nohup`, or a
+   background job. If a command shell would detach a GUI app, use a
+   non-interactive foreground command invocation instead of adding a launcher.
 5. After the process exits, require the result file to exist, read its JSON once,
    and remove it. A missing or unreadable result fails closed.
 6. While waiting, do not move the pointer, type, focus windows, or call another

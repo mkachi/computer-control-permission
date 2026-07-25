@@ -1,0 +1,124 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: ${{ matrix.platform_directory }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: windows-latest
+            platform_directory: windows-x86_64
+            asset: ccp-windows-x86_64.exe
+            kind: windows
+          - runner: windows-11-arm
+            platform_directory: windows-aarch64
+            asset: ccp-windows-aarch64.exe
+            kind: windows
+          - runner: ubuntu-24.04
+            platform_directory: linux-x86_64
+            asset: ccp-linux-x86_64.AppImage
+            kind: linux
+          - runner: ubuntu-24.04-arm
+            platform_directory: linux-aarch64
+            asset: ccp-linux-aarch64.AppImage
+            kind: linux
+          - runner: macos-15-intel
+            platform_directory: macos-x86_64
+            asset: ccp-macos-x86_64.tar.gz
+            kind: macos
+          - runner: macos-15
+            platform_directory: macos-aarch64
+            asset: ccp-macos-aarch64.tar.gz
+            kind: macos
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: "false"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: computer-control-overlay/pnpm-lock.yaml
+      - name: Install dependencies
+        working-directory: computer-control-overlay
+        run: pnpm install --frozen-lockfile
+      - name: Build native app
+        working-directory: computer-control-overlay
+        run: pnpm build:skill
+      - name: Prepare Windows asset
+        if: matrix.kind == 'windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path release | Out-Null
+          Copy-Item `
+            -LiteralPath "skills/ccp/bin/${{ matrix.platform_directory }}/computer-control-permission.exe" `
+            -Destination "release/${{ matrix.asset }}"
+      - name: Prepare Linux asset
+        if: matrix.kind == 'linux'
+        shell: bash
+        run: |
+          mkdir -p release
+          cp \
+            "skills/ccp/bin/${{ matrix.platform_directory }}/computer-control-permission.AppImage" \
+            "release/${{ matrix.asset }}"
+          chmod 755 "release/${{ matrix.asset }}"
+      - name: Prepare macOS asset
+        if: matrix.kind == 'macos'
+        shell: bash
+        run: |
+          mkdir -p release
+          tar -czf "release/${{ matrix.asset }}" \
+            -C "skills/ccp/bin/${{ matrix.platform_directory }}" \
+            "Computer Control Permission.app"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.platform_directory }}
+          path: release/${{ matrix.asset }}
+          if-no-files-found: error
+
+  publish:
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: release-*
+          path: release
+          merge-multiple: true
+      - name: Validate release tag
+        run: |
+          expected="$(jq -r .tag skills/ccp/assets/release.json)"
+          test "$expected" = "$GITHUB_REF_NAME"
+      - name: Create checksums
+        run: |
+          cd release
+          sha256sum ccp-* > SHA256SUMS.txt
+      - name: Publish unsigned release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cat > "$RUNNER_TEMP/release-notes.md" <<'EOF'
+          Unsigned CCP builds for Windows, Linux, and macOS.
+
+          Windows SmartScreen or macOS Gatekeeper may show a warning because
+          code signing and notarization are not configured yet.
+          EOF
+          gh release create "$GITHUB_REF_NAME" release/* \
+            --title "CCP $GITHUB_REF_NAME" \
+            --notes-file "$RUNNER_TEMP/release-notes.md"

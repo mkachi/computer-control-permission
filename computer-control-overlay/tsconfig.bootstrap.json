@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "scripts",
+    "outDir": "../skills/ccp/scripts",
+    "sourceMap": false,
+    "declaration": false,
+    "noEmitOnError": true
+  },
+  "include": ["scripts/bootstrap.ts"],
+  "exclude": []
+}

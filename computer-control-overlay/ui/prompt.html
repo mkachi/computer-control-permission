@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'"
+    />
+    <title>컴퓨터 제어 권한 요청</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="prompt-page">
+    <main class="permission-card" role="dialog" aria-labelledby="request-title">
+      <div class="card-glow" aria-hidden="true"></div>
+      <section class="card-content drag-region">
+        <div class="title-row">
+          <img class="agent-mark" src="../icons/icon.png" alt="" />
+          <div>
+            <p class="eyebrow"><span id="agent-name">Codex</span> control request</p>
+            <h1 id="request-title">에이전트가 컴퓨터를 사용하려 합니다</h1>
+          </div>
+        </div>
+
+        <div class="request-details">
+          <div class="session-info">
+            <span class="detail-label">세션</span>
+            <span id="session-label" class="session-name">현재 Codex 세션</span>
+          </div>
+          <div class="task-detail">
+            <span class="detail-label">승인이 필요한 작업</span>
+            <p id="request-reason">네이티브 마우스 및 키보드 제어</p>
+          </div>
+        </div>
+
+        <div class="footer-row">
+          <p class="activity" aria-live="polite">
+            <span class="activity-dot" aria-hidden="true"></span>
+            <span id="activity-copy">사용자 선택을 기다리는 중입니다</span>
+          </p>
+          <div class="actions">
+            <button id="deny" class="button button-secondary" type="button">No</button>
+            <button id="allow" class="button button-primary" type="button">Yes</button>
+          </div>
+        </div>
+      </section>
+    </main>
+    <script src="../build/ui/renderer.js"></script>
+  </body>
+</html>

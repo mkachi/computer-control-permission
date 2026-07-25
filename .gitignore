@@ -1,0 +1,12 @@
+.agents/
+
+computer-control-overlay/node_modules/
+computer-control-overlay/build/
+computer-control-overlay/dist/
+
+skills/ccp/bin/
+
+test/generated/
+test/runtime/
+
+*.log

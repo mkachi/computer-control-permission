@@ -1,0 +1,37 @@
+appId: dev.openai.computer-control-permission
+productName: Computer Control Permission
+asar: true
+npmRebuild: false
+compression: maximum
+electronLanguages:
+  - en-US
+  - ko
+directories:
+  output: dist
+  buildResources: icons
+files:
+  - package.json
+  - build/src/**/*
+  - build/ui/**/*
+  - ui/*.html
+  - ui/*.css
+  - icons/icon.png
+win:
+  icon: icons/icon.ico
+  target:
+    - portable
+  artifactName: computer-control-permission-${version}-windows-${arch}.${ext}
+portable:
+  requestExecutionLevel: user
+linux:
+  icon: icons/icon.png
+  category: Utility
+  target:
+    - AppImage
+  artifactName: computer-control-permission-${version}-linux-${arch}.${ext}
+mac:
+  icon: icons/icon.icns
+  category: public.app-category.utilities
+  target:
+    - zip
+  artifactName: computer-control-permission-${version}-macos-${arch}.${ext}

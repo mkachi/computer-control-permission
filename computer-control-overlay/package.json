@@ -1,6 +1,6 @@
 {
   "name": "computer-control-permission-overlay",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "private": true,
   "description": "Visible permission handoff before an agent controls the desktop",
   "author": "Computer Control Permission contributors",

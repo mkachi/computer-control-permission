@@ -114,7 +114,10 @@ function build(): void {
       "Computer Control Permission.app",
     );
     fs.rmSync(destination, { recursive: true, force: true });
-    fs.cpSync(source, destination, { recursive: true });
+    fs.cpSync(source, destination, {
+      recursive: true,
+      verbatimSymlinks: true,
+    });
   }
 
   fs.rmSync(output, { recursive: true, force: true });

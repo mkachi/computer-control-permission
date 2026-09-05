@@ -10,7 +10,7 @@ export interface Options {
 }
 
 export const DEFAULTS: Readonly<Options> = Object.freeze({
-  mode: "always",
+  mode: "if-active",
   activeWithin: 30,
   reason: "네이티브 마우스 및 키보드 제어",
   agent: "Codex",

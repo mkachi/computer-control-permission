@@ -7,6 +7,6 @@
     "declaration": false,
     "noEmitOnError": true
   },
-  "include": ["scripts/bootstrap.ts"],
+  "include": ["scripts/bootstrap.ts", "scripts/request.ts"],
   "exclude": []
 }

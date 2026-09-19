@@ -9,9 +9,11 @@ const resultFile = option("--result-file");
 const scenario = option("--scenario");
 const result = {
   decision: option("--decision") || "granted",
-  mode: option("--mode") || "if-active",
+  mode: option("--result-mode") || option("--mode") || "if-active",
   idleSeconds: Number(option("--idle") || 1),
-  activeWithin: Number(option("--active-within") || 30),
+  activeWithin: Number(
+    option("--result-active-within") || option("--active-within") || 30,
+  ),
 };
 
 if (scenario === "missing") process.exit(0);

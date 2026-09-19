@@ -9,8 +9,8 @@ test("defaults to activity-sensitive handoff", () => {
   assert.equal(options.sessionLabel, "현재 Codex 세션");
 });
 
-test("always mode remains an explicit opt-in", () => {
-  assert.equal(parseArgs(["--mode", "always"]).mode, "always");
+test("rejects modes that bypass the activity check", () => {
+  assert.throws(() => parseArgs(["--mode", "always"]));
 });
 
 test("parses session and activity options", () => {

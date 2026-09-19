@@ -187,7 +187,7 @@ void app.whenReady().then(() => {
     idleSeconds = null;
   }
 
-  if (!shouldDisplayPrompt(options.mode, idleSeconds, options.activeWithin)) {
+  if (!shouldDisplayPrompt(idleSeconds, options.activeWithin)) {
     exitWithResult("not-required", 0);
     return;
   }

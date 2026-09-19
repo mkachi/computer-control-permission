@@ -20,14 +20,13 @@ after(() => {
   fs.rmSync(generated, { recursive: true, force: true });
 });
 
-test("always mode never skips and activity failures fail closed", () => {
-  assert.equal(shouldDisplayPrompt("always", 9999, 30), true);
-  assert.equal(shouldDisplayPrompt("if-active", null, 30), true);
+test("activity failures fail closed", () => {
+  assert.equal(shouldDisplayPrompt(null, 30), true);
 });
 
 test("activity-sensitive mode only skips after the threshold", () => {
-  assert.equal(shouldDisplayPrompt("if-active", 30, 30), true);
-  assert.equal(shouldDisplayPrompt("if-active", 31, 30), false);
+  assert.equal(shouldDisplayPrompt(30, 30), true);
+  assert.equal(shouldDisplayPrompt(31, 30), false);
 });
 
 test("maps only the visible button values to decisions", () => {
@@ -45,7 +44,7 @@ test("maps only the visible button values to decisions", () => {
 test("writes a result once and refuses to overwrite it", () => {
   const resultFile = path.join(generated, "decision.json");
   const options: Options = {
-    mode: "always",
+    mode: "if-active",
     activeWithin: 30,
     reason: "test",
     agent: "Codex",

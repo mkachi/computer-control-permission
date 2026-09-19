@@ -16,11 +16,9 @@ export interface ResponseDecision {
 }
 
 export function shouldDisplayPrompt(
-  mode: Options["mode"],
   idleSeconds: number | null,
   activeWithin: number,
 ): boolean {
-  if (mode === "always") return true;
   return idleSeconds === null || idleSeconds <= activeWithin;
 }
 

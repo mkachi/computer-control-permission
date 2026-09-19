@@ -1,7 +1,7 @@
 import path from "node:path";
 
 export interface Options {
-  mode: "always" | "if-active";
+  mode: "if-active";
   activeWithin: number;
   reason: string;
   agent: string;
@@ -41,10 +41,9 @@ export function parseArgs(args: string[]): Options {
     switch (argument) {
       case "--mode": {
         const value = takeValue(args, index, argument);
-        if (value !== "always" && value !== "if-active") {
-          throw new Error("--mode must be 'always' or 'if-active'");
+        if (value !== "if-active") {
+          throw new Error("--mode is fixed to 'if-active'");
         }
-        options.mode = value;
         index += 1;
         break;
       }

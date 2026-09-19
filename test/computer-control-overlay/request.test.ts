@@ -28,9 +28,6 @@ test("accepts idle bypass only beyond the activity threshold", async () => {
   assert.equal(result.decision, "not-required");
   assert.equal(exitCode, 0);
   await assert.rejects(request("--decision", "not-required", "--idle", "30"));
-  await assert.rejects(request(
-    "--decision", "not-required", "--idle", "31", "--mode", "always",
-  ));
 });
 
 test("missing results, malformed results, and crashes never grant permission", async () => {
@@ -43,12 +40,16 @@ test("missing results, malformed results, and crashes never grant permission", a
 test("rejects contradictory exit codes and invalid activity data", async () => {
   await assert.rejects(request("--decision", "denied", "--exit", "0"));
   await assert.rejects(request("--decision", "granted", "--exit", "2"));
-  await assert.rejects(request("--mode", "unknown"));
-  await assert.rejects(request("--active-within", "-1"));
+  await assert.rejects(request("--result-mode", "always"));
+  await assert.rejects(request("--result-active-within", "-1"));
   await assert.rejects(request("--idle", "-1"));
 });
 
-test("rejects caller-supplied result files so old decisions cannot be reused", async () => {
+test("rejects caller overrides of the activity policy and result file", async () => {
+  await assert.rejects(request("--mode", "always"));
+  await assert.rejects(request("--mode=always"));
+  await assert.rejects(request("--active-within", "999999"));
+  await assert.rejects(request("--active-within=999999"));
   await assert.rejects(request("--result-file", "old-decision.json"));
   await assert.rejects(request("--result-file=old-decision.json"));
 });

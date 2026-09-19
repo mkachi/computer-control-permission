@@ -1,6 +1,6 @@
 ---
 name: ccp
-description: Prevent computer-use automation from colliding with the user's mouse and keyboard on the shared desktop. Check recent activity once before a bounded block of host pointer, native UI, or system keyboard control; show a Yes/No handoff only when activity is recent (if-active by default). Skip browser DOM/CDP/Playwright actions, in-app or virtual browser input, screenshots, APIs, and shell work that do not affect the host pointer, keyboard, or focus. A visible browser or the words computer use/compute use alone do not require this skill.
+description: Prevent computer-use automation from colliding with the user's mouse and keyboard on the shared desktop. Check recent activity once before a bounded block of host pointer, native UI, or system keyboard control; show a Yes/No handoff only when activity is recent under the fixed activity-sensitive policy. Skip browser DOM/CDP/Playwright actions, in-app or virtual browser input, screenshots, APIs, and shell work that do not affect the host pointer, keyboard, or focus. A visible browser or the words computer use/compute use alone do not require this skill.
 ---
 
 # Computer Control Permission
@@ -56,11 +56,12 @@ does not trigger a prompt.
    exit $LASTEXITCODE
    ```
 
-   The wrapper supplies `--mode if-active --active-within 30`, launches the native
-   app without detaching, waits for its completion, validates the result and exit
-   code, then prints one final JSON result. It manages its own temporary result
-   file and cleanup. Do not pass `--result-file` or separately inspect/poll files,
-   PIDs, or process lists. Do not build another launcher around the wrapper.
+   The wrapper enforces the activity-sensitive policy with a 30-second threshold,
+   launches the native app without detaching, waits for its completion, validates
+   the result and exit code, then prints one final JSON result. It manages the
+   policy arguments, temporary result file, and cleanup. Do not pass `--mode`,
+   `--active-within`, or `--result-file`; separately inspect or poll files, PIDs,
+   or process lists; or build another launcher around the wrapper.
 5. If the command tool returns a running session/cell ID, keep waiting on that
    same invocation with the tool's wait/resume operation until it finishes. A
    tool yield, empty output, or a slow response is not a failure. Do not start a
@@ -81,18 +82,17 @@ errors or denial as a stop, not a reason to automatically relaunch the prompt.
 The centered prompt shows the session and requested action. The prompt can be
 dragged without deciding.
 
-## Activity-sensitive mode
+## Activity-sensitive policy
 
-Use the wrapper's `if-active` default without asking the user to opt in. Input
+Use the wrapper without asking the user to opt in. Input
 within the last 30 seconds opens the Yes/No prompt; more than 30 seconds idle
 returns `not-required` without showing UI. This is an OS idle-time estimate, not
 continuous human-presence detection. Idle-detection failure opens the prompt
 because the native app cannot establish that the desktop is idle.
 
-Use `--mode always` only if the user explicitly requests a prompt even while idle.
-Do not add it because an operation uses computer-use, because a browser is
-visible, or just to be extra cautious. Chat approval does not replace a Yes when
-the activity-sensitive gate displays a prompt.
+There is no force-prompt mode. Do not replace or override the activity threshold.
+Chat approval does not replace a Yes when the activity-sensitive gate displays a
+prompt.
 
 ## Scope and renewal
 

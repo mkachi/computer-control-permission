@@ -15,7 +15,7 @@ function validateResult(value, exitCode) {
     }
     const result = value;
     const { decision, mode, idleSeconds, activeWithin } = result;
-    if ((mode !== "always" && mode !== "if-active") ||
+    if (mode !== "if-active" ||
         typeof activeWithin !== "number" ||
         !Number.isSafeInteger(activeWithin) || activeWithin < 0 ||
         (idleSeconds !== null &&
@@ -33,13 +33,25 @@ function validateResult(value, exitCode) {
     throw new Error("permission decision does not match the exit code or activity");
 }
 async function requestPermission(executable, args) {
-    if (args.some((argument) => argument.split("=", 1)[0] === "--result-file")) {
-        throw new Error("request.js manages --result-file internally");
+    const managedOptions = new Set([
+        "--mode",
+        "--active-within",
+        "--result-file",
+    ]);
+    const suppliedManagedOption = args.find((argument) => managedOptions.has(argument.split("=", 1)[0] ?? ""));
+    if (suppliedManagedOption) {
+        throw new Error(`request.js manages ${suppliedManagedOption.split("=", 1)[0]} internally`);
     }
     const directory = node_fs_1.default.mkdtempSync(node_path_1.default.join(node_os_1.default.tmpdir(), "ccp-request-"));
     const resultFile = node_path_1.default.join(directory, "result.json");
     try {
-        const child = (0, node_child_process_1.spawn)(executable, [...args, "--result-file", resultFile], {
+        const child = (0, node_child_process_1.spawn)(executable, [
+            ...args,
+            // Fixed arguments preserve compatibility with published v0.4.x apps while
+            // keeping callers from replacing the activity-sensitive policy.
+            "--mode", "if-active", "--active-within", "30",
+            "--result-file", resultFile,
+        ], {
             shell: false,
             windowsHide: true,
             stdio: ["ignore", "ignore", "inherit"],
@@ -62,10 +74,7 @@ async function main() {
     const [executable, ...args] = process.argv.slice(2);
     if (!executable)
         throw new Error("usage: node request.js <app-path> [app-options]");
-    const { result, exitCode } = await requestPermission(node_path_1.default.resolve(executable), [
-        // Explicit defaults also work with the already published v0.4.0 native app.
-        "--mode", "if-active", "--active-within", "30", ...args,
-    ]);
+    const { result, exitCode } = await requestPermission(node_path_1.default.resolve(executable), args);
     process.stdout.write(`${JSON.stringify(result)}\n`);
     process.exitCode = exitCode;
 }
